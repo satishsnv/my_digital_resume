@@ -1,0 +1,75 @@
+services:
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: satish-portfolio-frontend
+    ports:
+      - "3010:3010"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3010"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "com.docker.compose.project=satish-portfolio-react"
+      - "description=React Frontend for Interactive AI Portfolio"
+
+  # Backend Service  
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: satish-portfolio-backend
+    ports:
+      - "8310:8310"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MODEL_NAME=${MODEL_NAME:-gpt-4o-mini}
+      - MAX_TOKENS=${MAX_TOKENS:-1000}
+      - TEMPERATURE=${TEMPERATURE:-0.7}
+      - SERVER_PORT=8310
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENABLE_LOGGING=${ENABLE_LOGGING:-true}
+      - ENABLE_ANALYTICS=${ENABLE_ANALYTICS:-true}
+    env_file:
+      - .env
+    volumes:
+      - ./backend/logs:/app/logs
+      - ./backend/static:/app/static
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8310/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.docker.compose.project=satish-portfolio-react"
+      - "description=FastAPI Backend for Interactive AI Portfolio"
+
+  # Optional: Add a reverse proxy for production
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: satish-portfolio-proxy
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf
+  #     - ./ssl:/etc/nginx/ssl
+  #   depends_on:
+  #     - frontend
+  #     - backend
+  #   restart: unless-stopped
+
+volumes:
+  logs:
+    driver: local
+  static:
+    driver: local

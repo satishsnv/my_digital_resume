@@ -1,0 +1,31 @@
+# OpenAI API Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Alternative API Configuration (if using local LLM or other providers)
+# API_BASE_URL=http://localhost:8000/v1
+# API_KEY=your_api_key_here
+
+# Model Configuration
+MODEL_NAME=gpt-4o-mini
+# MODEL_NAME=gpt-3.5-turbo
+# MODEL_NAME=gpt-4
+
+# Response Configuration
+MAX_TOKENS=1000
+TEMPERATURE=0.7
+
+# Application Configuration
+APP_TITLE=Satish's Interactive AI Portfolio
+APP_DESCRIPTION=Chat with Satish - Senior Software Engineer & AI/ML Specialist
+SERVER_PORT=7860
+SHARE_GRADIO=false
+
+# Professional Contact Information (update these with your actual details)
+CONTACT_EMAIL=satish.dev@example.com
+LINKEDIN_URL=linkedin.com/in/satish-ai-engineer
+GITHUB_URL=github.com/satish-ai
+PORTFOLIO_URL=https://your-portfolio-domain.com
+
+# Analytics and Logging
+ENABLE_LOGGING=true
+LOG_LEVEL=INFO

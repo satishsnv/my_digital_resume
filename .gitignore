@@ -1,0 +1,32 @@
+# Python-generated files
+backend/__pycache__/
+backend/*.py[oc]
+backend/build/
+backend/dist/
+backend/wheels/
+backend/*.egg-info
+
+# Virtual environments
+backend/.venv
+
+# Environment variables (contains API keys)
+backend/.env
+
+
+# Runtime generated assets
+assets/
+logs/
+
+# Node.js dependencies
+frontend/node_modules/
+frontend/build/
+
+# IDE files
+*/.vscode/
+*/.idea/
+*/*.swp
+*/*.swo
+
+# OS files
+*/.DS_Store
+*/Thumbs.db
