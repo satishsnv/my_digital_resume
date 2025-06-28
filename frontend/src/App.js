@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
-import { Send, User, Bot, Loader, RefreshCw, Github, Linkedin, Phone, Mail } from 'lucide-react';
+import { Send, User, Bot, Loader, RefreshCw, Github, Linkedin, Phone, Mail, AlertCircle } from 'lucide-react';
 
 // Styled Components
 const AppContainer = styled.div`
@@ -515,6 +515,47 @@ const LoadingMessage = styled.div`
   font-style: italic;
 `;
 
+const ErrorMessage = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #e53e3e;
+  background: rgba(229, 62, 62, 0.1);
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+`;
+
+const ConnectionStatus = styled.div`
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: ${props => props.connected ? '#48bb78' : '#e53e3e'};
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+`;
+
+// Helper function to check backend connectivity
+const checkBackendHealth = async () => {
+  try {
+    const response = await fetch('/api/health', { 
+      method: 'GET',
+      timeout: 5000 
+    });
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+};
+
 // Helper function to render AI responses with basic markdown support
 const renderMessage = (content) => {
   if (typeof content !== 'string') return content;
@@ -536,10 +577,11 @@ function App() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [isConnected, setIsConnected] = useState(true);
+  const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
 
-  const scrollToBottom = () => {
-    // Use requestAnimationFrame to ensure DOM is updated before scrolling
+  const scrollToBottom = useCallback(() => {
     requestAnimationFrame(() => {
       messagesEndRef.current?.scrollIntoView({ 
         behavior: "smooth",
@@ -547,18 +589,41 @@ function App() {
         inline: "nearest"
       });
     });
-  };
+  }, []);
+
+  // Check backend health periodically
+  useEffect(() => {
+    const checkHealth = async () => {
+      const healthy = await checkBackendHealth();
+      setIsConnected(healthy);
+    };
+
+    checkHealth();
+    const interval = setInterval(checkHealth, 30000); // Check every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isLoading]); // Also scroll when loading state changes
+  }, [messages, isLoading, scrollToBottom]);
 
   useEffect(() => {
-    // Fetch profile data
-    fetch('/api/profile')
-      .then(res => res.json())
-      .then(data => setProfile(data))
-      .catch(err => console.error('Error fetching profile:', err));
+    // Fetch profile data with error handling
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch('/api/profile');
+        if (!response.ok) throw new Error('Failed to fetch profile');
+        const data = await response.json();
+        setProfile(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError('Failed to load profile information');
+        setIsConnected(false);
+      }
+    };
+
+    fetchProfile();
   }, []);
 
   const sendMessage = async (messageText) => {
@@ -567,6 +632,7 @@ function App() {
     const userMessage = messageText.trim();
     setInputMessage('');
     setIsLoading(true);
+    setError(null);
 
     // Add user message to chat
     const newUserMessage = { type: 'user', content: userMessage, timestamp: new Date() };
@@ -589,22 +655,29 @@ function App() {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       
       if (data.success) {
         const botMessage = { type: 'assistant', content: data.response, timestamp: new Date() };
         setMessages(prev => [...prev, botMessage]);
+        setIsConnected(true);
       } else {
         throw new Error(data.error || 'Failed to get response');
       }
     } catch (error) {
       console.error('Error:', error);
+      setIsConnected(false);
       const errorMessage = { 
         type: 'assistant', 
-        content: 'I apologize, but I encountered an error. Please try again.', 
+        content: 'I apologize, but I encountered an error. Please check the connection and try again.', 
         timestamp: new Date() 
       };
       setMessages(prev => [...prev, errorMessage]);
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -620,32 +693,44 @@ function App() {
   };
 
   return (
-    <AppContainer>
-      {/* Left Panel - Profile Information */}
-      <LeftPanel>
-        <Header>
-          {profile && (
-            <>
-              {profile.photo_url ? (
-                <ProfilePhoto
-                  className="face-upper"
-                  src={`http://localhost:8310${profile.photo_url}`}
-                  alt={profile.name}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-              ) : (
-                <ProfilePlaceholder>
-                  👨‍💻
-                </ProfilePlaceholder>
-              )}
-              <div style={{display: 'none'}}>
-                <ProfilePlaceholder>
-                  👨‍💻
-                </ProfilePlaceholder>
-              </div>
+    <>
+      <ConnectionStatus connected={isConnected}>
+        {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
+      </ConnectionStatus>
+      
+      <AppContainer>
+        {/* Left Panel - Profile Information */}
+        <LeftPanel>
+          <Header>
+            {error && (
+              <ErrorMessage>
+                <AlertCircle size={16} />
+                {error}
+              </ErrorMessage>
+            )}
+            
+            {profile && (
+              <>
+                {profile.photo_url ? (
+                  <ProfilePhoto
+                    className="face-upper"
+                    src={`http://localhost:8310${profile.photo_url}`}
+                    alt={profile.name}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : (
+                  <ProfilePlaceholder>
+                    👨‍💻
+                  </ProfilePlaceholder>
+                )}
+                <div style={{display: 'none'}}>
+                  <ProfilePlaceholder>
+                    👨‍💻
+                  </ProfilePlaceholder>
+                </div>
               
               <Title>{profile.name}</Title>
               <Subtitle>{profile.title}</Subtitle>
@@ -771,6 +856,7 @@ function App() {
         </InputContainer>
       </ChatContainer>
     </AppContainer>
+    </>
   );
 }
 
