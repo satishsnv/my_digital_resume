@@ -1,6 +1,6 @@
-# 🚀 Satish AI Portfolio - Backend
+# 🚀 Backend - Satish's AI-Powered Digital Resume
 
-A high-performance FastAPI backend that powers the interactive AI portfolio chatbot. Built with modern Python practices and optimized for production deployment.
+A FastAPI backend that powers the interactive AI portfolio with OpenAI integration.
 
 ![Python](https://img.shields.io/badge/Python-3.12+-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green)
@@ -9,367 +9,146 @@ A high-performance FastAPI backend that powers the interactive AI portfolio chat
 ## ✨ Features
 
 - **FastAPI Framework** - High-performance async web framework
-- **OpenAI Integration** - GPT-4o-mini powered intelligent conversations
-- **Analytics Tracking** - Built-in conversation and usage analytics
-- **Static File Serving** - Optimized asset delivery
-- **Health Monitoring** - Comprehensive health checks and logging
-- **Secure Configuration** - Environment-based API key management
+- **OpenAI Integration** - GPT-4o powered intelligent conversations
+- **Analytics Tracking** - Conversation and usage analytics
+- **Static File Serving** - Asset delivery (photos, resume)
+- **Health Monitoring** - Health checks and logging
 
-## 🛠️ Technology Stack
+## 🛠️ Tech Stack
 
-- **Python 3.12+** - Modern Python with latest features
-- **FastAPI** - Async web framework with automatic OpenAPI docs
-- **OpenAI API** - GPT-4o-mini for intelligent responses
-- **Pydantic** - Data validation and settings management
-- **Uvicorn** - Lightning-fast ASGI server
-- **UV Package Manager** - Fast, reliable dependency management
-
-## 📁 Project Structure
-
-```
-backend/
-├── app.py                 # Main FastAPI application
-├── analytics.py           # Analytics tracking module
-├── pyproject.toml        # Python dependencies and project config
-├── uv.lock              # Dependency lock file
-├── Dockerfile           # Container configuration
-├── run_backend.sh       # Development startup script
-├── static/              # Static file serving
-│   ├── Resume_satish_2025.txt  # Context data
-│   └── satish_photo.jpeg      # Profile photo
-└── logs/                # Application logs (created at runtime)
-    ├── analytics.json
-    └── conversations.json
-```
+- **Python 3.12+** - Modern Python
+- **FastAPI** - Async web framework
+- **OpenAI API** - GPT-4o for AI responses
+- **Uvicorn** - ASGI server
+- **UV** - Fast package manager
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.12+
-- UV package manager (recommended) or pip
+- Python 3.12+ and UV package manager
 - OpenAI API key
 
-### Installation
+### Setup
 
-```bash
-# Navigate to backend directory
-cd backend
+1. **Install dependencies:**
+   ```bash
+   uv install
+   ```
 
-# Install dependencies with UV (recommended)
-uv sync
+2. **Configure environment:**
+   ```bash
+   cp .envtemplate .env
+   # Add your OpenAI API key to .env
+   ```
 
-# Or with pip
-pip install -r requirements.txt
+3. **Start server:**
+   ```bash
+   uv run uvicorn app:app --host 0.0.0.0 --port 8310 --reload
+   ```
 
-# Configure environment
-cp ../.env.example ../.env
-# Edit .env with your OpenAI API key
-```
-
-### Development Server
-
-```bash
-# Start with hot reload
-python app.py
-
-# Or using uvicorn directly
-uvicorn app:app --reload --host 0.0.0.0 --port 8310
-```
-
-The API will be available at:
-- **API Base**: http://localhost:8310
-- **Interactive Docs**: http://localhost:8310/docs
-- **Health Check**: http://localhost:8310/api/health
+4. **API docs:** http://0.0.0.0:8310/docs
 
 ## 🔧 Configuration
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
-
-```env
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key_here
-MODEL_NAME=gpt-4o-mini
-MAX_TOKENS=1000
-TEMPERATURE=0.7
-
-# Optional: Custom API Base URL
-# API_BASE_URL=https://api.openai.com/v1
-
-# Server Configuration
-SERVER_PORT=8310
-LOG_LEVEL=INFO
-
-# Features
-ENABLE_LOGGING=true
-ENABLE_ANALYTICS=true
-```
-
-## 📡 API Endpoints
-
-### Core Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Basic health check |
-| GET | `/api/health` | Detailed health status |
-| POST | `/api/chat` | Chat with Satish's AI |
-| GET | `/api/profile` | Get profile information |
-| GET | `/api/examples` | Get example questions |
-| GET | `/api/analytics` | Get usage analytics |
-| GET | `/static/*` | Static file serving |
-
-### API Documentation
-
-FastAPI automatically generates interactive API documentation:
-- **Swagger UI**: http://localhost:8310/docs
-- **ReDoc**: http://localhost:8310/redoc
-
-### Example API Usage
-
 ```bash
-# Health check
-curl http://localhost:8310/api/health
-
-# Get profile
-curl http://localhost:8310/api/profile
-
-# Chat with Satish
-curl -X POST http://localhost:8310/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "Tell me about your experience",
-    "history": []
-  }'
+# .env file
+OPENAI_API_KEY=your_openai_api_key_here
+MODEL_NAME=gpt-4o
+CORS_ORIGINS=http://localhost:3010,http://0.0.0.0:3010
 ```
 
-## 🏗️ Architecture
+### Project Structure
 
-### Core Components
+```
+backend/
+├── app.py              # Main FastAPI app
+├── analytics.py        # Analytics tracking
+├── pyproject.toml     # Dependencies
+├── .envtemplate       # Environment template
+└── static/            # Static files
+    ├── Resume_satish_2025.txt
+    └── satish_photo.jpeg
+```
 
-1. **SatishChatbot Class**
-   - Manages OpenAI API integration
-   - Handles conversation context
-   - Provides intelligent responses
+## 🌐 API Endpoints
 
-2. **Analytics Module**
-   - Tracks conversation metrics
-   - Logs user interactions
-   - Provides usage insights
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/profile` | GET | Get profile data |
+| `/api/chat` | POST | Send chat message |
+| `/api/health` | GET | Health check |
+| `/static/*` | GET | Static files |
+| `/docs` | GET | API documentation |
 
-3. **Static File Serving**
-   - Serves profile photos
-   - Delivers resume content
-   - Optimized asset delivery
-
-### Data Models
+### API Usage
 
 ```python
-# Chat request/response
-class ChatMessage(BaseModel):
-    message: str
-    history: List[Dict[str, str]] = []
-
-class ChatResponse(BaseModel):
-    response: str
-    success: bool
-    error: Optional[str] = None
-```
-
-## 📊 Analytics & Monitoring
-
-### Built-in Analytics
-
-The backend tracks:
-- Total messages exchanged
-- Response characteristics
-- Error rates and types
-- Conversation patterns
-
-### Log Files
-
-```bash
-# View application logs
-tail -f logs/chatbot.log
-
-# Check analytics data
-cat logs/analytics.json
-
-# Review conversations
-cat logs/conversations.json
-```
-
-### Health Monitoring
-
-```bash
-# Check API health
-curl http://localhost:8310/api/health
-
-# Response includes:
+# Chat endpoint
+POST /api/chat
 {
-  "status": "healthy",
-  "api_configured": true,
-  "timestamp": "2025-06-28T10:30:00"
+  "message": "Hello!",
+  "history": []
 }
 ```
 
-## 🐳 Docker Deployment
+## 🚀 Deployment
 
-### Build and Run
-
-```bash
-# Build image
-docker build -t satish-backend .
-
-# Run container
-docker run -p 8310:8310 \
-  -e OPENAI_API_KEY=your_key \
-  satish-backend
-
-# Or use docker-compose (from project root)
-docker-compose up backend
-```
-
-### Container Features
-
-- Non-root user for security
-- Health checks included
-- Volume mounts for logs
-- Environment variable support
-
-## 🔐 Security
-
-### Best Practices Implemented
-
-- **Environment Variables** - Secure API key storage
-- **CORS Configuration** - Controlled cross-origin requests
-- **Input Validation** - Pydantic models prevent injection
-- **Error Handling** - No sensitive data in responses
-- **Logging** - Comprehensive audit trail
-
-### Production Considerations
-
-```python
-# Example production settings
-CORS_ORIGINS = [
-    "https://yourdomain.com",
-    "https://www.yourdomain.com"
-]
-
-# Rate limiting (recommended addition)
-# API key rotation policies
-# Request size limits
-```
-
-## 🧪 Testing
-
-### Manual Testing
+### Production
 
 ```bash
-# Test health endpoint
-curl http://localhost:8310/api/health
+# Using UV
+uv run uvicorn app:app --host 0.0.0.0 --port 8310
 
-# Test chat functionality
-curl -X POST http://localhost:8310/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Hello Satish!"}'
+# Using pip
+pip install -r requirements.txt
+uvicorn app:app --host 0.0.0.0 --port 8310
 ```
 
-### Automated Testing (Future Enhancement)
+### Docker
 
-```python
-# Example test structure
-def test_health_endpoint():
-    response = client.get("/api/health")
-    assert response.status_code == 200
-
-def test_chat_endpoint():
-    response = client.post("/api/chat", 
-        json={"message": "Test message"})
-    assert response.status_code == 200
+```bash
+docker build -t satish-resume-backend .
+docker run -p 8310:8310 --env-file .env satish-resume-backend
 ```
 
-## 🔧 Development
+## 📊 Analytics
 
-### Code Structure
+The backend tracks:
+- Conversation counts
+- Message analytics
+- User interactions
+- System health metrics
 
-- **app.py** - Main application and routes
-- **analytics.py** - Analytics functionality
-- **static/** - Static assets and context files
+Analytics are stored in `logs/analytics.json`.
 
-### Adding New Features
-
-1. **New Endpoint**:
-   ```python
-   @app.get("/api/new-feature")
-   async def new_feature():
-       return {"status": "implemented"}
-   ```
-
-2. **Enhanced Analytics**:
-   ```python
-   # Add to analytics.py
-   def track_custom_metric(self, metric_name, value):
-       self._update_analytics(metric_name, value)
-   ```
-
-### Performance Optimization
-
-- Use async/await for I/O operations
-- Implement response caching where appropriate
-- Monitor memory usage for long-running conversations
-
-## 📋 Troubleshooting
+## 🔍 Troubleshooting
 
 ### Common Issues
 
-1. **OpenAI API Errors**
-   ```bash
-   # Check API key configuration
-   echo $OPENAI_API_KEY
-   
-   # Verify API access
-   curl -H "Authorization: Bearer $OPENAI_API_KEY" \
-        https://api.openai.com/v1/models
-   ```
+**OpenAI API errors:**
+- Check API key in `.env`
+- Verify account has credits
+- Check model availability
 
-2. **Port Conflicts**
-   ```bash
-   # Check if port 8310 is in use
-   lsof -i :8310
-   
-   # Use different port
-   uvicorn app:app --port 8311
-   ```
+**CORS errors:**
+- Update `CORS_ORIGINS` in `.env`
+- Restart server after changes
 
-3. **Static File Issues**
-   ```bash
-   # Ensure static directory exists
-   mkdir -p static
-   
-   # Check file permissions
-   ls -la static/
-   ```
+**Port in use:**
+```bash
+lsof -i :8310
+# Kill process if needed
+```
 
-## 🚀 Deployment
+## 🔒 Security
 
-### Production Checklist
-
-- [ ] Environment variables configured
-- [ ] OpenAI API key validated
-- [ ] Logging directory writable
-- [ ] Health checks responding
-- [ ] CORS origins configured
-- [ ] SSL/TLS certificates (if applicable)
-
-### Scaling Considerations
-
-- Use reverse proxy (nginx) for static files
-- Implement Redis for session storage
-- Add database for persistent analytics
-- Use load balancer for multiple instances
+- Environment-based API key management
+- Secure CORS configuration
+- Input validation with Pydantic
+- Request rate limiting (future enhancement)
 
 ---
 
-**Built with ❤️ by Satish | FastAPI + OpenAI + Modern Python**
+**Built with ❤️ using FastAPI + OpenAI**

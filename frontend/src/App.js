@@ -185,7 +185,10 @@ function App() {
                     alt={profile.name}
                     onError={(e) => {
                       e.target.style.display = 'none';
-                      e.target?.nextSibling.style.display = 'flex';
+                      const nextSibling = e.target.nextSibling;
+                      if (nextSibling) {
+                        nextSibling.style.display = 'flex';
+                      }
                     }}
                   />
                 ) : (
@@ -243,7 +246,7 @@ function App() {
                 ))}
               </div>
               
-              <h3 className="section-title">💼 Areas of Expertise</h3>
+              <h3 className="section-title">🎯 Areas of Expertise</h3>
               <div className="expertise-container">
                 {profile.expertise_areas.map((area, index) => (
                   <div key={index} className="expertise-card">
