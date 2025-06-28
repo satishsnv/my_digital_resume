@@ -160,7 +160,7 @@ function App() {
     sendMessage(inputMessage);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (inputMessage.trim() && !isLoading) {
@@ -333,7 +333,7 @@ function App() {
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 placeholder="Type your message here... (Press Enter to send)"
                 disabled={isLoading}
                 autoComplete="off"
