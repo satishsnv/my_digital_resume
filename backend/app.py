@@ -1,13 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import openai
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import json
 from typing import List, Dict, Optional
 import logging
 from datetime import datetime
@@ -26,12 +24,23 @@ logging.basicConfig(
 
 app = FastAPI(title="Satish AI Portfolio API", version="1.0.0")
 
-# Enable CORS
+# Enable CORS - More secure configuration
+allowed_origins = [
+    "http://localhost:3010",
+    "http://0.0.0.0:3010", 
+    "http://127.0.0.1:3010"
+]
+
+# Add custom origins from environment if provided
+custom_origins = os.getenv('CORS_ORIGINS', '')
+if custom_origins:
+    allowed_origins.extend([origin.strip() for origin in custom_origins.split(',') if origin.strip()])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3010", "http://127.0.0.1:3010"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],  # Only allow needed methods
     allow_headers=["*"],
 )
 
@@ -61,18 +70,27 @@ class SatishChatbot:
         """Setup OpenAI API configuration."""
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
-            logging.warning("OPENAI_API_KEY not found")
+            logging.warning("OPENAI_API_KEY not found - AI chat will be unavailable")
             self.client = None
             return
             
-        self.client = openai.OpenAI(
-            api_key=api_key,
-            base_url=os.getenv('API_BASE_URL', None)
-        )
-        
-        self.model_name = os.getenv('MODEL_NAME', 'gpt-4o-mini')
-        self.max_tokens = int(os.getenv('MAX_TOKENS', '1000'))
-        self.temperature = float(os.getenv('TEMPERATURE', '0.7'))
+        try:
+            self.client = openai.OpenAI(
+                api_key=api_key,
+                base_url=os.getenv('API_BASE_URL', None)
+            )
+            
+            self.model_name = os.getenv('MODEL_NAME', 'gpt-4o-mini')
+            self.max_tokens = int(os.getenv('MAX_TOKENS', '1000'))
+            self.temperature = float(os.getenv('TEMPERATURE', '0.7'))
+            
+            # Test the API connection
+            self.client.models.list()
+            logging.info(f"OpenAI API initialized successfully with model: {self.model_name}")
+            
+        except Exception as e:
+            logging.error(f"Failed to initialize OpenAI API: {e}")
+            self.client = None
         
     def load_context(self):
         """Load Satish's context from the resume text file."""
@@ -88,29 +106,29 @@ class SatishChatbot:
         """Create the system prompt that defines Satish's personality."""
         return f"""You are Satish, responding to messages as if you are him personally. Use the following resume and professional information about Satish to inform your responses:
 
-{self.context}
+        {self.context}
 
-IMPORTANT INSTRUCTIONS:
-1. Respond as Satish in first person (use "I", "my", "me") 
-2. Be conversational and professional, as if you are Satish himself
-3. Draw from Satish's background, experience, and expertise when relevant
-4. If asked about technical topics, provide insights based on Satish's actual experience from the resume
-5. Stay in character as Satish throughout the conversation
-6. Be encouraging and supportive, especially for career-related questions
-7. Focus on information that's actually in the resume - don't make up details
-8. Keep responses focused and practical
-9. Use a professional yet approachable tone
-10. Provide responses in markdown format for better frontend rendering
-11. When discussing projects, refer to the specific work mentioned in the resume
-12. For contact information, use the details provided in the resume
+        IMPORTANT INSTRUCTIONS:
+        1. Respond as Satish in first person (use "I", "my", "me") 
+        2. Be conversational and professional, as if you are Satish himself
+        3. Draw from Satish's background, experience, and expertise when relevant
+        4. If asked about technical topics, provide insights based on Satish's actual experience from the resume
+        5. Stay in character as Satish throughout the conversation
+        6. Be encouraging and supportive, especially for career-related questions
+        7. Focus on information that's actually in the resume - don't make up details
+        8. Keep responses focused and practical
+        9. Use a professional yet approachable tone
+        10. Provide responses in markdown format for better frontend rendering
+        11. When discussing projects, refer to the specific work mentioned in the resume
+        12. For contact information, use the details provided in the resume
 
-CONTACT DETAILS FROM RESUME:
-- Email: snvskiit@gmail.com
-- Phone: +91-9963699436
-- GitHub: https://github.com/satishsnv/
-- LinkedIn: https://www.linkedin.com/in/satishsnv/
+        CONTACT DETAILS FROM RESUME:
+        - Email: snvskiit@gmail.com
+        - Phone: +91-9963699436
+        - GitHub: https://github.com/satishsnv/
+        - LinkedIn: https://www.linkedin.com/in/satishsnv/
 
-Remember: You ARE Satish, not an AI assistant representing him. Base all responses on the actual information in the resume provided above."""
+        Remember: You ARE Satish, not an AI assistant representing him. Base all responses on the actual information in the resume provided above."""
 
     def generate_response(self, user_message: str, history: List[Dict[str, str]]) -> str:
         """Generate a response from Satish."""
@@ -236,22 +254,6 @@ async def get_profile():
             "Spearheaded the development of GenAI-Companion using LLM, LangChain and RAG",
             "Built self sustaining teams with a focus on innovation and quality",            
             "Successfully transformed monolith architectures to scalable microservices"
-        ]
-    }
-
-@app.get("/api/examples")
-async def get_examples():
-    """Get example questions for the chat interface."""
-    return {
-        "examples": [
-            "Tell me about your approach to solution architecture and system design",
-            "How do you lead teams to deliver complex AI/ML products?", 
-            "What's your experience in building enterprise-scale applications?",
-            "Can you walk me through your GenAI and LLM deployment strategies?",
-            "How do you approach product development from ideation to production?",
-            "What's your leadership philosophy for building high-performing teams?",
-            "How do you architect microservices for scalability and reliability?",
-            "What emerging AI technologies are you most excited about implementing?"
         ]
     }
 

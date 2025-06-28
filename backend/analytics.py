@@ -1,9 +1,7 @@
 import json
-import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any
-import os
 
 class PortfolioAnalytics:
     """Simple analytics for the portfolio chatbot."""
@@ -37,14 +35,18 @@ class PortfolioAnalytics:
         """Log errors."""
         self._update_analytics(f"errors_{error_type}", 1)
         
-    def get_analytics_summary(self) -> Dict[str, Any]:
-        """Get analytics summary."""
+    def get_analytics(self) -> Dict[str, Any]:
+        """Get analytics data."""
         try:
             with open(self.analytics_file, 'r') as f:
                 data = json.load(f)
             return data
         except FileNotFoundError:
             return {}
+    
+    def get_analytics_summary(self) -> Dict[str, Any]:
+        """Get analytics summary."""
+        return self.get_analytics()
             
     def _update_analytics(self, metric: str, value: int):
         """Update analytics metrics."""

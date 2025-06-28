@@ -1,7 +1,7 @@
 # Backend Dockerfile - FastAPI Application
 FROM python:3.12-slim
 
-LABEL maintainer="Satish <your.email@example.com>"
+LABEL maintainer="satishsnv@gmail.com"
 LABEL description="Interactive AI Portfolio - FastAPI Backend"
 LABEL version="2.0.0"
 
@@ -39,7 +39,7 @@ EXPOSE 8310
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8310/api/health || exit 1
+    CMD curl -f http://0.0.0.0:8310/api/health || exit 1
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
