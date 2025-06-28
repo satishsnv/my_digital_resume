@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, User, Bot, Loader, RefreshCw, Github, Linkedin, Phone, Mail, AlertCircle } from 'lucide-react';
 import './App.css';
 
-controller = new AbortController();
+const controller = new AbortController();
 const { signal } = controller;
 
 // Use fetch with a timeout

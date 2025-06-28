@@ -27,7 +27,7 @@ app = FastAPI(title="Satish AI Portfolio API", version="1.0.0")
 # Enable CORS - More secure configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://snvskiit*", "http://localhost*"],
+    allow_origins=["https://snvskiit*", "http://0.0.0.0*", "https://0.0.0.0*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],  # Only allow needed methods
     allow_headers=["*"],
