@@ -31,8 +31,8 @@ cp .env.example .env
 docker-compose up --build
 
 # Access at:
-# Frontend: http://0.0.0.0:3010
-# Backend API: http://0.0.0.0:8310/docs
+# Frontend: http://localhost:3010
+# Backend API: http://localhost:8310/docs
 ```
 
 ## 📖 Documentation
@@ -84,9 +84,9 @@ docker-compose up -d --build
 
 ## 🔍 Health Monitoring
 
-- **Backend Health**: http://0.0.0.0:8310/api/health
-- **API Documentation**: http://0.0.0.0:8310/docs
-- **Frontend**: http://0.0.0.0:3010
+- **Backend Health**: http://localhost:8310/api/health
+- **API Documentation**: http://localhost:8310/docs
+- **Frontend**: http://localhost:3010
 
 ---
 
