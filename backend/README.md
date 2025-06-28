@@ -123,7 +123,7 @@ The backend tracks:
 
 Analytics are stored in `logs/analytics.json`.
 
-## � Troubleshooting
+## 🔍 Troubleshooting
 
 ### Common Issues
 
