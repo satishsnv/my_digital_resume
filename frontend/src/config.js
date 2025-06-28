@@ -8,13 +8,10 @@ const config = {
     return `${this.BACKEND_BASE_URL}/api`;
   },
   
-  get STATIC_BASE_URL() {
-    return `${this.BACKEND_BASE_URL}/static`;
-  },
   
   // Helper methods for building URLs
   apiUrl: (endpoint) => `${config.API_BASE_URL}${endpoint}`,
-  staticUrl: (path) => `${config.STATIC_BASE_URL}${path}`,
+  staticUrl: (path) => `${config.BACKEND_BASE_URL}${path}`,
 };
 
 export default config;

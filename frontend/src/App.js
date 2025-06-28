@@ -246,7 +246,7 @@ function App() {
                 ))}
               </div>
               
-              <h3 className="section-title">💼 Areas of Expertise</h3>
+              <h3 className="section-title">🎯 Areas of Expertise</h3>
               <div className="expertise-container">
                 {profile.expertise_areas.map((area, index) => (
                   <div key={index} className="expertise-card">
