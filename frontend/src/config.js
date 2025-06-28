@@ -1,7 +1,7 @@
 // Configuration utility for environment variables
 const config = {
   // Backend base URL - falls back to current origin if not set
-  BACKEND_BASE_URL: process.env.BACKEND_BASE_URL,
+  BACKEND_BASE_URL: import.meta.env.VITE_BACKEND_BASE_URL || window.location.origin,
 
   // API endpoints
   get API_BASE_URL() {

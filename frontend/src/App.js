@@ -185,7 +185,10 @@ function App() {
                     alt={profile.name}
                     onError={(e) => {
                       e.target.style.display = 'none';
-                      e.target?.nextSibling.style.display = 'flex';
+                      const nextSibling = e.target.nextSibling;
+                      if (nextSibling) {
+                        nextSibling.style.display = 'flex';
+                      }
                     }}
                   />
                 ) : (
