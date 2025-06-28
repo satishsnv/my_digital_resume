@@ -25,9 +25,20 @@ logging.basicConfig(
 app = FastAPI(title="Satish AI Portfolio API", version="1.0.0")
 
 # Enable CORS - More secure configuration
+allowed_origins = [
+    "http://localhost:3010",
+    "http://0.0.0.0:3010", 
+    "http://127.0.0.1:3010"
+]
+
+# Add custom origins from environment if provided
+custom_origins = os.getenv('CORS_ORIGINS', '')
+if custom_origins:
+    allowed_origins.extend([origin.strip() for origin in custom_origins.split(',') if origin.strip()])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://snvskiit*", "http://0.0.0.0*", "https://0.0.0.0*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],  # Only allow needed methods
     allow_headers=["*"],

@@ -1,23 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, User, Bot, Loader, RefreshCw, Github, Linkedin, Phone, Mail, AlertCircle } from 'lucide-react';
 import './App.css';
-
-const controller = new AbortController();
-const { signal } = controller;
-
-// Use fetch with a timeout
-const timeoutId = setTimeout(() => {
-  controller.abort();
-}, 5000); // 5 seconds timeout
-
+import config from './config';
 
 // Helper function to check backend connectivity
 const checkBackendHealth = async () => {
-  try {    
-    const response = await fetch('/api/health', { 
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 5000); // 5 seconds timeout
+    
+    const response = await fetch(config.apiUrl('/health'), { 
       method: 'GET',
-      signal: signal
+      signal: controller.signal
     });
+    
     clearTimeout(timeoutId);
     return response.ok;
   } catch (error) {
@@ -80,7 +78,7 @@ function App() {
     // Fetch profile data with error handling
     const fetchProfile = async () => {
       try {
-        const response = await fetch('/api/profile');
+        const response = await fetch(config.apiUrl('/profile'));
         if (!response.ok) throw new Error('Failed to fetch profile');
         const data = await response.json();
         setProfile(data);
@@ -113,7 +111,7 @@ function App() {
         [msg.type]: msg.content
       }));
 
-      const response = await fetch('/api/chat', {
+      const response = await fetch(config.apiUrl('/chat'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -183,11 +181,11 @@ function App() {
                 {profile.photo_url ? (
                   <img
                     className="profile-photo face-upper"
-                    src={`http://0.0.0.0:8310${profile.photo_url}`}
+                    src={config.staticUrl(profile.photo_url)}
                     alt={profile.name}
                     onError={(e) => {
                       e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
+                      e.target?.nextSibling.style.display = 'flex';
                     }}
                   />
                 ) : (

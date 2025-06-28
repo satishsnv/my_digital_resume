@@ -11,6 +11,7 @@ backend/.venv
 
 # Environment variables (contains API keys)
 backend/.env
+frontend/.env
 
 
 # Runtime generated assets
