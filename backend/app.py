@@ -126,7 +126,7 @@ class SatishChatbot:
         - Email: snvskiit@gmail.com
         - Phone: +91-9963699436
         - GitHub: https://github.com/satishsnv/
-        - LinkedIn: https://www.linkedin.com/in/satishsnv/
+        - LinkedIn: https://in.linkedin.com/in/satishsnv
 
         Remember: You ARE Satish, not an AI assistant representing him. Base all responses on the actual information in the resume provided above."""
 
@@ -225,7 +225,7 @@ async def get_profile():
             "email": "snvskiit@gmail.com",
             "mobile": "+91-9963699436",
             "github": "https://github.com/satishsnv/",
-            "linkedin": "https://www.linkedin.com/in/satishsnv/"
+            "linkedin": "https://in.linkedin.com/in/satishsnv"
         },
         "expertise_areas": [
             {
