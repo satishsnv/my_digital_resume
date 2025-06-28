@@ -46,6 +46,7 @@ function App() {
   const [profile, setProfile] = useState(null);
   const [isConnected, setIsConnected] = useState(true);
   const [error, setError] = useState(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = useCallback(() => {
@@ -78,15 +79,19 @@ function App() {
     // Fetch profile data with error handling
     const fetchProfile = async () => {
       try {
+        setIsProfileLoading(true);
         const response = await fetch(config.apiUrl('/profile'));
         if (!response.ok) throw new Error('Failed to fetch profile');
         const data = await response.json();
         setProfile(data);
         setError(null);
+        setIsConnected(true);
       } catch (err) {
         console.error('Error fetching profile:', err);
         setError('Failed to load profile information');
         setIsConnected(false);
+      } finally {
+        setIsProfileLoading(false);
       }
     };
 
@@ -155,6 +160,15 @@ function App() {
     sendMessage(inputMessage);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (inputMessage.trim() && !isLoading) {
+        sendMessage(inputMessage);
+      }
+    }
+  };
+
   const clearChat = () => {
     setMessages([]);
   };
@@ -176,7 +190,12 @@ function App() {
               </div>
             )}
             
-            {profile && (
+            {isProfileLoading ? (
+              <div className="loading-message" style={{ padding: '2rem', textAlign: 'center' }}>
+                <Loader size={24} className="animate-spin" />
+                <p>Loading profile...</p>
+              </div>
+            ) : profile ? (
               <>
                 {profile.photo_url ? (
                   <img
@@ -266,67 +285,75 @@ function App() {
                 ))}
               </div>
             </>
-          )}
-        </div>
-      </div>
-
-      {/* Right Panel - Chat Interface */}
-      <div className="chat-container">
-        {/* Messages */}
-        <div className="messages-container">
-          {messages.map((message, index) => (
-            <div key={index} className={`message ${message.type === 'user' ? 'user' : ''}`}>
-              <div className={`message-icon ${message.type === 'user' ? 'user' : 'bot'}`}>
-                {message.type === 'user' ? <User size={18} /> : <Bot size={18} />}
-              </div>
-              <div className={`message-bubble ${message.type === 'user' ? 'user' : 'bot'}`}>
-                {renderMessage(message.content)}
-              </div>
+          ) : !error ? (
+            <div className="loading-message" style={{ padding: '2rem', textAlign: 'center' }}>
+              <p>No profile data available</p>
             </div>
-          ))}
-          
-          {isLoading && (
-            <div className="message">
-              <div className="message-icon bot">
-                <Bot size={18} />
-              </div>
-              <div className="message-bubble bot">
-                <div className="loading-message">
-                  <Loader size={16} className="animate-spin" />
-                  Satish is thinking...
+          ) : null}
+        </div>
+        </div>
+
+        {/* Right Panel - Chat Interface */}
+        <div className="chat-container">
+          {/* Messages */}
+          <div className="messages-container">
+            {messages.map((message, index) => (
+              <div key={index} className={`message ${message.type === 'user' ? 'user' : ''}`}>
+                <div className={`message-icon ${message.type === 'user' ? 'user' : 'bot'}`}>
+                  {message.type === 'user' ? <User size={18} /> : <Bot size={18} />}
+                </div>
+                <div className={`message-bubble ${message.type === 'user' ? 'user' : 'bot'}`}>
+                  {renderMessage(message.content)}
                 </div>
               </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
+            ))}
+            
+            {isLoading && (
+              <div className="message">
+                <div className="message-icon bot">
+                  <Bot size={18} />
+                </div>
+                <div className="message-bubble bot">
+                  <div className="loading-message">
+                    <Loader size={16} className="animate-spin" />
+                    Satish is thinking...
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
 
-        {/* Input */}
-        <div className="input-container">
-          <form onSubmit={handleSubmit} className="form-container">
-            <input
-              className="input"
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Type your message here... (Press Enter to send)"
-              disabled={isLoading}
-            />
-            <button className="send-button" type="submit" disabled={isLoading || !inputMessage.trim()}>
-              {isLoading ? <Loader size={18} className="animate-spin" /> : <Send size={18} />}
-              Send
-            </button>
-          </form>
-          {messages.length > 0 && (
-            <button className="clear-button" onClick={clearChat}>
-              <RefreshCw size={18} />
-              Clear
-            </button>
-          )}
+          {/* Input */}
+          <div className="input-container">
+            <form onSubmit={handleSubmit} className="form-container">
+              <input
+                className="input"
+                type="text"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your message here... (Press Enter to send)"
+                disabled={isLoading}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="sentences"
+              />
+              <button className="send-button" type="submit" disabled={isLoading || !inputMessage.trim()}>
+                {isLoading ? <Loader size={18} className="animate-spin" /> : <Send size={18} />}
+                <span>Send</span>
+              </button>
+            </form>
+            {messages.length > 0 && (
+              <button className="clear-button" onClick={clearChat}>
+                <RefreshCw size={18} />
+                <span>Clear</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }
